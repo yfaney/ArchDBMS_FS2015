@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define NUM_THREADS     5
+//#define NUM_THREADS     60
 
 struct thread_data{
    int  thread_id;
@@ -25,6 +25,13 @@ void *PrintHello(void *threadarg)
 
    pthread_exit(NULL);
 }
+
+void *send_File_To_Client(void *threadarg){
+	struct thread_data *my_data;
+	my_data = (struct thread_data *) threadarg;
+
+}
+
 
 int main ()
 {
