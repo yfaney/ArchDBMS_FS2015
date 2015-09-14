@@ -1,6 +1,6 @@
 #!/bin/bash
 
 for dest in $(<nodelist.txt); do
-  scp /tmp/file_32B ${dest}:remote/path/
+  scp /tmp/file_* ${dest}:/home/umkc_yjang
 
 done
