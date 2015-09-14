@@ -36,7 +36,7 @@ def receive(sock):
 #        running = True
         while True:
             chunk = sock.recv(BLOCK_SIZE)
-            if chunk[len(chunk)-1:] == '\n':
+            if chunk[len(chunk)-1:] == ' ':
                 chunks.append(chunk[:len(chunk)-1])
                 break
             else:
@@ -55,8 +55,10 @@ resultLog = []
 
 for node_list in nodeList:
     #sk.connect(("192.168.0.16", 55700))
-    sk.connect(node_list,55700)
+    sk.connect((node_list, 55700))
     for file in TEST_FILES:
+        if DEBUG:
+            print file["name"]
         for i in range(1,4):
             sk.send(file["name"])
             recvd = receive(sk)
@@ -66,7 +68,7 @@ for node_list in nodeList:
         startTime = datetime.datetime.now()
         recvd = receive(sk)
         endTime = datetime.datetime.now()
-        if 'File was not open' in recvd[len('File was not open')]:
+        if 'File was not open' == recvd[:len('File was not open')]:
             print "File Error: File was not open"
         else:
             td = endTime - startTime

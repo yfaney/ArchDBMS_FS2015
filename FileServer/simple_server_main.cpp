@@ -9,7 +9,7 @@
 
 using namespace std;
 
-const char* FILE_PATH = "/tmp/";
+const char* FILE_PATH = "";
 
 /**
  * @brief Left Trim
@@ -57,8 +57,8 @@ std::string& trim(std::string& s) {
 int send_file(string fileName, ServerSocket* sock){
 	//ServerSocket sk = *sock;
 	ifstream myfile;
-	string filePath = string(FILE_PATH) + fileName;
-//	string filePath = fileName;
+//	string filePath = string(FILE_PATH) + fileName;
+	string filePath = fileName;
 	cout << "opening : " << filePath.c_str() << '\n';
 	myfile.open(filePath.c_str());
         try{
@@ -68,7 +68,7 @@ int send_file(string fileName, ServerSocket* sock){
               cout << line;
 	      *(sock) << line;
 	    }
-            *(sock) << "\n";
+            *(sock) << " ";
 	  }
 	  else{
 	    *(sock) << "File was not open\n";

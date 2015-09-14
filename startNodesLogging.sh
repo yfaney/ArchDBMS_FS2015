@@ -4,7 +4,7 @@
 
 for dest in $(<nodelist.txt); do
    echo "Starting server program on $dest ..."
-   ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/startServer.sh
+   ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/startServer.sh &
 
 for dest in $(<nodelist.txt); do
    echo "Running client program on $dest ..."
@@ -12,7 +12,7 @@ for dest in $(<nodelist.txt); do
 
 for dest in $(<nodelist.txt); do
    echo "Killing server program on $dest ..."
-   ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/stopServer.sh
+   ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/stopServer.sh &
 
 FORNOW=$(date +%Y-%m-%d_%H%M%S)
 
