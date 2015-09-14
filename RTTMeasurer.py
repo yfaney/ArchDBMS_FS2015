@@ -7,17 +7,19 @@ NODE_LIST_FILE = ["192.168.0.16"]
 TEST_FILES = ["file_32B", "file_1K", "file_256K","file_512K", "file_1M"]
 
 MAX_LEN = 1048576
-BLOCK_SIZE = 8192
+BLOCK_SIZE = 2048
 DEBUG = True
 
 # Read node list from a file
 f = open("nodelist.txt")
 nodeList = f.readlines()
-while '' in nodeList:
-    nodeList.pop(nodeList.index(''))
-	
+
 for item in nodeList:
-    print item
+    print item.strip()
+    print socket.gethostbyname(item.strip())
+    
+
+print len(nodeList)
 
 def receive(sock):
         chunks = []
@@ -38,8 +40,10 @@ sk = socket.socket(
 #now connect to the web server on port 80
 # - the normal http port
 
-for node_list in NODE_LIST_FILE:
-    sk.connect(("192.168.0.16", 55700))
+
+for node_list in nodeList:
+    #sk.connect(("192.168.0.16", 55700))
+	sk.connect(socket.gethostbyname(node_list.strip()),55700)
     for fileName in TEST_FILES:
         for i in range(1,4):
             sk.send(fileName)
@@ -56,3 +60,4 @@ for node_list in NODE_LIST_FILE:
         if(DEBUG):
             print (len(recvd))
             print delay
+    sk.close()
