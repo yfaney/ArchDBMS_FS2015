@@ -68,7 +68,7 @@ int send_file(string fileName, ServerSocket* sock){
               cout << line;
 	      *(sock) << line;
 	    }
-            *(sock) << " ";
+            *(sock) << "\n";
 	  }
 	  else{
 	    *(sock) << "File was not open\n";
