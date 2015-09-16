@@ -56,6 +56,7 @@ for node_list in nodeList:
     try:
         #create an INET, STREAMing socket
         sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sk.settimeout(60.0)
         sk.connect((node, 55700))
         for file in TEST_FILES:
             if DEBUG:

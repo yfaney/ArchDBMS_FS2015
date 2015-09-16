@@ -1,4 +1,3 @@
-planetlab3.ucsd.edu
 planetlab1.cs.du.edu
 planetlab1.netlab.uky.edu
 planetlab2.cs.pitt.edu
@@ -58,3 +57,4 @@ planetlab1.cs.purdue.edu
 planetlab-2.cse.ohio-state.edu
 salt.planetlab.cs.umd.edu
 planetlab1.csee.usf.edu
+planetlab3.ucsd.edu
