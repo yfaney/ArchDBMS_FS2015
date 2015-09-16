@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import datetime
+import gc, time
 import socket
 import sys
 import csv
@@ -42,7 +43,6 @@ def receive(sock):
                 break
             else:
                 chunks.append(chunk)
-            del chunk
         return ''.join(chunks)
 
 #Log Structure: [ Source, Target, TImestamp, FileSize, Delay ]
@@ -82,6 +82,9 @@ for node_list in nodeList:
         del recvd
         sk.close()
         del sk
+        # GC and Wait 10sec to GC working
+        gc.enable()
+        time.sleep(10)
     except Exception,e:
         print ("Measuring Error :%s" % str(e))
 
