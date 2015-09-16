@@ -6,7 +6,7 @@ for dest in $(<$1); do
 done
 for dest in $(<$1); do
    echo "Running client program on $dest ..."
-   ssh -iid_rsa_dbms2 umkc_yjang@${dest} python /home/umkc_yjang/RTTMeasurer.py
+   ssh -iid_rsa_dbms2 umkc_yjang@${dest} python /home/umkc_yjang/RTTMeasurer.py $1
 done
 for dest in $(<$1); do
    echo "Killing server program on $dest ..."
