@@ -27,6 +27,7 @@ int main(int argc, char** argv){
 	long nSize = atol(sSize.c_str());
 	if(sUnit.compare("K") == 0){
 		nSize *= UNIT_KILOBYTE;
+	}else if(sUnit.compare("B") == 0){
 	}else if(sUnit.compare("M") == 0){
 		nSize *= UNIT_MEGABYTE;
 	}else if(sUnit.compare("G") == 0){
