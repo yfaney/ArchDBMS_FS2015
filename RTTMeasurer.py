@@ -76,7 +76,7 @@ for node_list in nodeList:
                 if(DEBUG):
                     print ("Bytes received: %d" %len(recvd))
                     print ("Delay: %f ms..." % delay)
-                resultLog.append('"%s","%s","%s",%d,%f' % (MyAddress, node_list, startTime, file["size"], delay))
+                resultLog.append('"%s","%s","%s",%d,%f\n' % (MyAddress, node_list, startTime, file["size"], delay))
         sk.close()
     except Exception,e:
         print ("My Error :%s" % str(e))
