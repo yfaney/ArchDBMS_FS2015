@@ -25,7 +25,7 @@ f.close()
 nodeList = []
 
 for item in rawList:
-    if item != MyAddress:
+    if item.strip() != MyAddress:
         #print item.strip()
         nodeList.append(item.strip())
 
@@ -33,7 +33,7 @@ print "Node Size: %d" % len(nodeList)
 
 def receive(sock):
         chunks = []
-        bytes_recd = 0
+#        bytes_recd = 0
 #        running = True
         while True:
             chunk = sock.recv(BLOCK_SIZE)
@@ -42,6 +42,7 @@ def receive(sock):
                 break
             else:
                 chunks.append(chunk)
+            del chunk
         return ''.join(chunks)
 
 #Log Structure: [ Source, Target, TImestamp, FileSize, Delay ]
@@ -78,7 +79,9 @@ for node_list in nodeList:
                     print ("Bytes received: %d" %len(recvd))
                     print ("Delay: %f ms..." % delay)
                 resultLog.append('"%s","%s","%s",%d,%f\n' % (MyAddress, node_list, startTime, file["size"], delay))
+        del recvd
         sk.close()
+        del sk
     except Exception,e:
         print ("Measuring Error :%s" % str(e))
 
