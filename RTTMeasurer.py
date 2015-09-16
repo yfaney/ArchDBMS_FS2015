@@ -12,7 +12,7 @@ TEST_FILES = [{"name" : "file_32B", "size" : 32},
 
 MAX_LEN = 1048576
 BLOCK_SIZE = 2048
-DEBUG = True
+DEBUG = False
 #At first, get the current node address
 
 MyAddress = socket.gethostname()
@@ -50,6 +50,7 @@ resultLog = []
 
 for node_list in nodeList:
     #sk.connect(("192.168.0.16", 55700))
+    print ("%s - %s" % (MyAddress, node_list))
     node = socket.gethostbyname(node_list)
     try:
         #create an INET, STREAMing socket
@@ -79,7 +80,7 @@ for node_list in nodeList:
                 resultLog.append('"%s","%s","%s",%d,%f\n' % (MyAddress, node_list, startTime, file["size"], delay))
         sk.close()
     except Exception,e:
-        print ("My Error :%s" % str(e))
+        print ("Measuring Error :%s" % str(e))
 
 #with open("resultLog.csv", "wb") as f:
 #    writer = csv.writer(f)
@@ -92,3 +93,4 @@ except Exception,e:
     print(str(e))
 #for line in resultLog:
 #    f.write
+print ("Done.")
