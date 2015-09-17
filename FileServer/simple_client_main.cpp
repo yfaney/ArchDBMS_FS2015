@@ -6,7 +6,9 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include <omp.h>
+//#include <omp.h>
+#include <sys/time.h>
+#include <time.h>
 #include <stdlib.h>
 #include <netdb.h>
 #define NO_OF_NODES 60
@@ -18,22 +20,24 @@ vector<string> getAddrList(const char*);
 void writeLogList(const char*, vector<string>);
 string recvContents(ClientSocket*);
 vector<string> getTestList();
+double getTimeDiff(struct timeval , struct timeval );
+string timeNow();
 
-const char* NODE_LIST = "nodelist.txt";
+const char* NODE_LIST = "/home/umkc_yjang/nodelist.txt";
 const string FILE_LIST[] = {"file_32B", "file_1K", "file_256K", "file_512K", "file_1M"};
-const char* RESULT_FILE = "resultLog.csv";
+const char* RESULT_FILE = "/home/umkc_yjang/resultLog.csv";
 const bool DEBUG = false;
 
 int main ( int argc, char* argv[] )
 {
+  string test = timeNow();
+  cout << test;
+  struct timeval t_start, t_end, pt_start, pt_end;
+//  double pt_start = omp_get_wtime();
   char lhost[256];
   lhost[255] = '\0';
   gethostname(lhost, 255);
   string myhost(lhost);
-//  cout << "Hostname:" << myhost <<endl;
-//  struct hostent* h;
-//  h = gethostbyname(lhost);
-//  cout << "Hostname:" << h->h_name;
   char ip[15];
   char hostName[256];
   vector<string> addrList = getAddrList(argv[1]);
@@ -47,32 +51,41 @@ int main ( int argc, char* argv[] )
       hostname_to_ip(hostName, ip);
       ClientSocket client_socket ( ip, 55700 );
       cout << "Connected. Measuring RTT..." << flush;
+      gettimeofday(&pt_start, NULL);
       string reply;
       try{
         int i=0;
         int j=0;
+// This part is for tuning!! -Start
         for(i=0; i<4; i++){
           for(j=0; j<NO_OF_FILES; j++){
   	    client_socket << FILE_LIST[j];
             reply = recvContents(&client_socket);
           }
         }
+// This part is for tuning!! -End
+// Now Real Measuring!! -Start
+        string currTime = timeNow();
         for(j=0; j<NO_OF_FILES; j++){
           if(DEBUG) cout << "Req:" << FILE_LIST[j] << endl;
-          double t_start = omp_get_wtime();
+            gettimeofday(&t_start, NULL);
 	  client_socket << FILE_LIST[j];
           reply = recvContents(&client_socket);
-          double t_end = omp_get_wtime();
-          double delay = t_end - t_start;
-//          if(DEBUG) cout << "We received this response from the server:\n" << reply << endl;
+          gettimeofday(&t_end, NULL);
+          double delay = getTimeDiff(t_start, t_end)/1000;
           if(DEBUG) cout << "Received: " << reply.length() << '\t' << "Delay: " << delay << endl;
           stringstream ss;
-          ss << "\"" << myhost <<"\",\"" << *it << "\"," << reply.length() << "," << delay;
+          ss << "\"" << myhost    << "\",\"" << *it << "\","
+             << "\"" << currTime <<  "\","   << reply.length()
+             << ","  << delay;
           logList.push_back(ss.str());
         }
-        cout << "Measured." <<endl << flush;
+        gettimeofday(&pt_end, NULL);
+        cout << "Done within " <<getTimeDiff(pt_start, pt_end)/1000 << "sec." << endl << flush;
       }
-      catch ( SocketException& ) {}
+      catch ( SocketException& e) {
+        cout << endl << "Exception was caught during file receiving:" << e.description() << "\n";
+      }
     }
     catch ( SocketException& e )
     {
@@ -80,14 +93,28 @@ int main ( int argc, char* argv[] )
     }
   }
   if(logList.size() > 0){
-    //writeLogList(RESULT_FILE, logList);
-    for(vector<string>::iterator it = logList.begin(); it != logList.end(); ++it){
-      cout << *it << endl;
-    }
+    writeLogList(RESULT_FILE, logList);
+//    double pt_end = omp_get_wtime();
+    //printLogList(RESULT_FILE, logList);
   }
   return 0;
 }
 
+string timeNow(){
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer [80];
+
+  time (&rawtime);
+  timeinfo = localtime (&rawtime);
+
+  strftime (buffer,80,"%F %T",timeinfo);
+  string nowstring(buffer);
+  return nowstring;
+}
+double getTimeDiff(struct timeval t1, struct timeval t2){
+  return (double)((t2.tv_sec - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec))/1000;
+}
 string recvContents(ClientSocket* sk){
   string result;
   string buff;
@@ -168,8 +195,14 @@ void writeLogList(const char* filePath, vector<string> logList){
         myfile.open(filePath);
         if(myfile.is_open()){
                 for(vector<string>::iterator it = logList.begin(); it != logList.end(); ++it){
-                        myfile << *it << '\n';
+                        myfile << *it << endl;
                 }
                 myfile.close();
         }else cout << "Unable to open file!";
+}
+
+void printLogList(vector<string> logList){
+  for(vector<string>::iterator it = logList.begin(); it != logList.end(); ++it){
+    cout << *it << endl;
+  }
 }
