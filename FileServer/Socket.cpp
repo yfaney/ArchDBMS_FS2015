@@ -154,7 +154,9 @@ bool Socket::connect ( const std::string host, const int port )
   m_addr.sin_family = AF_INET;
   m_addr.sin_port = htons ( port );
 
-  int status = inet_pton ( AF_INET, host.c_str(), &m_addr.sin_addr );
+  int status = ::inet_pton ( AF_INET, host.c_str(), &m_addr.sin_addr );
+//  cout<<host.c_str();
+//  cout<<m_addr.sin_addr.s_addr<<endl;
 
   if ( errno == EAFNOSUPPORT ) return false;
 

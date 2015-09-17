@@ -12,7 +12,7 @@ simple_server: $(simple_server_objects)
 
 
 simple_client: $(simple_client_objects)
-	g++ -o simple_client $(simple_client_objects)
+	g++ -lgomp -o simple_client $(simple_client_objects)
 
 
 Socket: Socket.cpp

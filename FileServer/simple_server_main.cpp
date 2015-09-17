@@ -65,7 +65,7 @@ int send_file(string fileName, ServerSocket* sock){
           if(myfile.is_open()){
 	    string line;
 	    while(getline(myfile, line)){
-              cout << line;
+              //cout << line;
 	      *(sock) << line;
 	    }
             *(sock) << " ";
