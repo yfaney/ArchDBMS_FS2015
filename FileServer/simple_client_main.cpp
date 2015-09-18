@@ -30,8 +30,8 @@ const bool DEBUG = false;
 
 int main ( int argc, char* argv[] )
 {
-  string test = timeNow();
-  cout << test;
+//  string test = timeNow();
+//  cout << test;
   struct timeval t_start, t_end, pt_start, pt_end;
 //  double pt_start = omp_get_wtime();
   char lhost[256];
@@ -50,12 +50,13 @@ int main ( int argc, char* argv[] )
       cout << "Connecting to "<<hostName<< "..." <<flush;
       hostname_to_ip(hostName, ip);
       ClientSocket client_socket ( ip, 55700 );
-      cout << "Connected. Measuring RTT..." << flush;
+      cout << "Connected. " << flush;
       gettimeofday(&pt_start, NULL);
       string reply;
       try{
         int i=0;
         int j=0;
+        gettimeofday(&t_start, NULL);
 // This part is for tuning!! -Start
         for(i=0; i<4; i++){
           for(j=0; j<NO_OF_FILES; j++){
@@ -66,13 +67,13 @@ int main ( int argc, char* argv[] )
 // This part is for tuning!! -End
 // Now Real Measuring!! -Start
         string currTime = timeNow();
+        cout << "Measuring RTT..." << flush;
         for(j=0; j<NO_OF_FILES; j++){
           if(DEBUG) cout << "Req:" << FILE_LIST[j] << endl;
-            gettimeofday(&t_start, NULL);
 	  client_socket << FILE_LIST[j];
           reply = recvContents(&client_socket);
           gettimeofday(&t_end, NULL);
-          double delay = getTimeDiff(t_start, t_end)/1000;
+          double delay = getTimeDiff(t_start, t_end);
           if(DEBUG) cout << "Received: " << reply.length() << '\t' << "Delay: " << delay << endl;
           stringstream ss;
           ss << "\"" << myhost    << "\",\"" << *it << "\","
@@ -81,7 +82,7 @@ int main ( int argc, char* argv[] )
           logList.push_back(ss.str());
         }
         gettimeofday(&pt_end, NULL);
-        cout << "Done within " <<getTimeDiff(pt_start, pt_end)/1000 << "sec." << endl << flush;
+        cout << "Done within " <<getTimeDiff(pt_start, pt_end) << "sec." << endl << flush;
       }
       catch ( SocketException& e) {
         cout << endl << "Exception was caught during file receiving:" << e.description() << "\n";
@@ -108,13 +109,15 @@ string timeNow(){
   time (&rawtime);
   timeinfo = localtime (&rawtime);
 
-  strftime (buffer,80,"%F %T",timeinfo);
+  strftime (buffer,80,"%Y-%m-%d %H:%M:%S",timeinfo);
   string nowstring(buffer);
   return nowstring;
 }
+
 double getTimeDiff(struct timeval t1, struct timeval t2){
-  return (double)((t2.tv_sec - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec))/1000;
+  return (double)(t2.tv_sec - t1.tv_sec) + (double)(t2.tv_usec - t1.tv_usec)/1000000;
 }
+
 string recvContents(ClientSocket* sk){
   string result;
   string buff;
