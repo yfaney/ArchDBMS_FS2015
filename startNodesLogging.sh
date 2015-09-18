@@ -3,27 +3,24 @@ if [ "$#" -ne 1 ]; then
     echo "usage: ./startNodesLogging.sh nodelist.txt"
     exit
 fi
-for dest in $(<$1); do
-   echo "Starting server program on $dest ..."
-   ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/startServer.sh &
-done
-echo "Wait 2.5 min so that every server program starts..."
-sleep 2.5m
+
+./remote_startServer.sh $1
+echo "Wait 2 min so that every server gets started..."
+sleep 2m
+
 for dest in $(<$1); do
    echo "Running client program on $dest ..."
 #   ssh -iid_rsa_dbms2 -oConnectTimeout=60 umkc_yjang@${dest} python /home/umkc_yjang/RTTMeasurer.py $1
-   ssh -iid_rsa_dbms2 -oConnectTimeout=60 umkc_yjang@${dest} /home/umkc_yjang/simple_client $1
+   ssh -iid_rsa_dbms2 -oConnectTimeout=60 umkc_yjang@${dest} /home/umkc_yjang/simple_client /home/umkc_yjang/$1 /home/umkc_yjang/resultLog.csv >> ~/logs/client_log_${dest}.log 2>&1 &
 done
-for dest in $(<$1); do
-   echo "Killing server program on $dest ..."
-   ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/stopServer.sh &
-done
-
-FORNOW=$(date +%Y-%m-%d_%H%M%S)
-
-for dest in $(<$1); do
-   echo "Getting logs from $dest ..."
-   scp -iid_rsa_dbms2 umkc_yjang@${dest}:/home/umkc_yjang/resultLog.csv ~/logs/result_${dest}_${FORNOW}.csv
+echo "Wait 50 min so that every server gets results..."
+FROMHERE=50
+for ((i=FROMHERE; i>=1; i--))
+do
+    echo "$i min remains..."
+    sleep 1m
 done
 
+./remote_stopServer.sh $1
 
+./getLogs.sh $1

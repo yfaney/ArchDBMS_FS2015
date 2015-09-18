@@ -11,7 +11,10 @@
 #include <time.h>
 #include <stdlib.h>
 #include <netdb.h>
-#define NO_OF_NODES 60
+#include <algorithm>    // std::random_shuffle
+#include <ctime>        // std::time
+#include <cstdlib>      // std::rand, std::srand
+#define NO_OF_NODES 256
 #define NO_OF_FILES 5
 using namespace std;
 
@@ -23,6 +26,10 @@ vector<string> getTestList();
 double getTimeDiff(struct timeval , struct timeval );
 string timeNow();
 
+// random generator function:
+int myrandom (int i) { return std::rand()%i;}
+
+
 const char* NODE_LIST = "/home/umkc_yjang/nodelist.txt";
 const string FILE_LIST[] = {"file_32B", "file_1K", "file_256K", "file_512K", "file_1M"};
 const char* RESULT_FILE = "/home/umkc_yjang/resultLog.csv";
@@ -30,8 +37,12 @@ const bool DEBUG = false;
 
 int main ( int argc, char* argv[] )
 {
-//  string test = timeNow();
-//  cout << test;
+  if(argc < 3){
+    cout << "usage: " << argv[0] << " <NODE_LIST_FILE> <OUTPUT_LOG_FILE>" <<endl;
+    return 1;
+  }
+  string test = timeNow();
+  cout << "Current Time: " << test << endl;
   struct timeval t_start, t_end, pt_start, pt_end;
 //  double pt_start = omp_get_wtime();
   char lhost[256];
@@ -42,6 +53,11 @@ int main ( int argc, char* argv[] )
   char hostName[256];
   vector<string> addrList = getAddrList(argv[1]);
 //  vector<string> addrList = getTestList();
+// Shuffling the list
+  std::srand ( unsigned ( std::time(0) ) );
+  std::vector<int> myvector;
+// using myrandom:
+  std::random_shuffle ( addrList.begin(), addrList.end(), myrandom);
   vector<string> logList;
   for(vector<string>::iterator it = addrList.begin(); it != addrList.end(); ++it){
     if(myhost.compare(*it) == 0) continue;
@@ -94,7 +110,7 @@ int main ( int argc, char* argv[] )
     }
   }
   if(logList.size() > 0){
-    writeLogList(RESULT_FILE, logList);
+    writeLogList(argv[2], logList);
 //    double pt_end = omp_get_wtime();
     //printLogList(RESULT_FILE, logList);
   }
