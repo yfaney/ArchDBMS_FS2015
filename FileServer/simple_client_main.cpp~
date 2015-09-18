@@ -57,17 +57,16 @@ int main ( int argc, char* argv[] )
   std::srand ( unsigned ( std::time(0) ) );
   std::vector<int> myvector;
 // using myrandom:
-  std::random_shuffle ( addrList.begin(), addrList.end(), myrandom);
+  std::random_shuffle ( myvector.begin(), myvector.end(), myrandom);
   vector<string> logList;
-  int progress = 1;
   for(vector<string>::iterator it = addrList.begin(); it != addrList.end(); ++it){
     if(myhost.compare(*it) == 0) continue;
     try{
       strcpy(hostName, (*it).c_str());
-      cout << "I" << progress << ":Connecting:"<<hostName<< "." <<flush;
+      cout << "Connecting to "<<hostName<< "..." <<flush;
       hostname_to_ip(hostName, ip);
       ClientSocket client_socket ( ip, 55700 );
-      cout << "Connected." << flush;
+      cout << "Connected. " << flush;
       gettimeofday(&pt_start, NULL);
       string reply;
       try{
@@ -115,7 +114,6 @@ int main ( int argc, char* argv[] )
 //    double pt_end = omp_get_wtime();
     //printLogList(RESULT_FILE, logList);
   }
-  cout << "Finished." << endl;
   return 0;
 }
 
