@@ -6,10 +6,12 @@ if [ "$#" -ne 1 ]; then
 fi
 
 ./remote_stopServer.sh $1
+
 echo "Waiting 2min until every nodes start server..."
 sleep 2m
 
 ./remote_stopClient.sh $1
+
 echo "Waiting 2min until every nodes start server..."
 sleep 2m
 
@@ -22,6 +24,6 @@ for dest in $(<retry.txt); do
       echo "$dest" >> failedNodes.txt
    fi
 done
-echo "Waiting 5min until every node gets all files..."
-sleep 5m
+#echo "Waiting 5min until every node gets all files..."
+#sleep 5m
 echo "Done."
