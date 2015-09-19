@@ -4,7 +4,7 @@ if [ "$#" -ne 1 ]; then
     exit
 fi
 for dest in $(<$1); do
-   echo "Starting server program on $dest ..."
+   echo "Stopping server program on $dest ..."
    ssh -iid_rsa_dbms2 umkc_yjang@${dest} /home/umkc_yjang/local_stopServer.sh &
 done
 
