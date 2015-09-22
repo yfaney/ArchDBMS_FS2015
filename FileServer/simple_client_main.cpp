@@ -16,6 +16,7 @@
 #include <cstdlib>      // std::rand, std::srand
 #define NO_OF_NODES 256
 #define NO_OF_FILES 5
+
 using namespace std;
 
 int hostname_to_ip(char *  , char *);
@@ -25,9 +26,10 @@ string recvContents(ClientSocket*);
 vector<string> getTestList();
 double getTimeDiff(struct timeval , struct timeval );
 string timeNow();
+int mysleep(int );
 
 // random generator function:
-int myrandom (int i) { return std::rand()%i;}
+int myrandom (int i) { return rand()%i;}
 
 
 const char* NODE_LIST = "/home/umkc_yjang/nodelist.txt";
@@ -54,14 +56,23 @@ int main ( int argc, char* argv[] )
   vector<string> addrList = getAddrList(argv[1]);
 //  vector<string> addrList = getTestList();
 // Shuffling the list
-  std::srand ( unsigned ( std::time(0) ) );
-  std::vector<int> myvector;
+  srand ( unsigned ( time(0) ) );
 // using myrandom:
-  std::random_shuffle ( addrList.begin(), addrList.end(), myrandom);
+  random_shuffle ( addrList.begin(), addrList.end(), myrandom);
   vector<string> logList;
   int progress = 1;
+  int retryCount = 0;
   for(vector<string>::iterator it = addrList.begin(); it != addrList.end(); ++it){
     if(myhost.compare(*it) == 0) continue;
+// Retry up to 3 times to avoid some temporary problems
+    if(retryCount > 0 && retryCount < 3){
+      cout << "Retry on " << *it << endl;
+      --it;
+      ++retryCount;
+      mysleep(3000);
+    }else{
+      retryCount = 0;
+    }
     try{
       strcpy(hostName, (*it).c_str());
       cout << "I" << progress << ":Connecting:"<<hostName<< "." <<flush;
@@ -102,13 +113,14 @@ int main ( int argc, char* argv[] )
         cout << "Done within " <<getTimeDiff(pt_start, pt_end) << "sec." << endl << flush;
       }
       catch ( SocketException& e) {
-        cout << endl << "Exception was caught during file receiving:" << e.description() << "\n";
+        cout << endl << "Exception was caught during file receiving:" << e.description() << endl;
       }
     }
     catch ( SocketException& e )
     {
-      cout << endl << "Exception was caught:" << e.description() << "\n";
+      cout << endl << "Exception was caught:" << e.description() << endl;
     }
+    ++progress;
   }
   if(logList.size() > 0){
     writeLogList(argv[2], logList);
@@ -117,6 +129,13 @@ int main ( int argc, char* argv[] )
   }
   cout << "Finished." << endl;
   return 0;
+}
+
+int mysleep(int msec){
+  struct timespec tim;
+  tim.tv_sec = msec / 1000;
+  tim.tv_nsec = (msec - tim.tv_sec * 1000) / 1000000;
+  return nanosleep(&tim, NULL);
 }
 
 string timeNow(){
@@ -133,7 +152,7 @@ string timeNow(){
 }
 
 double getTimeDiff(struct timeval t1, struct timeval t2){
-  return (double)(t2.tv_sec - t1.tv_sec) + (double)(t2.tv_usec - t1.tv_usec)/1000000;
+  return (double)(t2.tv_sec - t1.tv_sec)*1000 + (double)(t2.tv_usec - t1.tv_usec)/1000;
 }
 
 string recvContents(ClientSocket* sk){

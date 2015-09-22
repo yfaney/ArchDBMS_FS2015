@@ -7,13 +7,13 @@ fi
 
 ./remote_stopServer.sh $1
 
-echo "Waiting 2min until every nodes stop server..."
-sleep 2m
+echo "Waiting 3min until every nodes stop server..."
+sleep 3m
 
 ./remote_stopClient.sh $1
 
-echo "Waiting 2min until every nodes stop client..."
-sleep 2m
+echo "Waiting 3min until every nodes stop client..."
+sleep 3m
 
 for dest in $(<$2); do
    echo "Copy files to $dest ..."

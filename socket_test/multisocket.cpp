@@ -3,11 +3,10 @@
    This version runs forever, forking off a separate 
    process for each connection
 */
-#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -21,9 +20,10 @@ using namespace std;
 
 void dostuff(int); /* function prototype */
 int send_file(string , int );
-std::string& ltrim(std::string& );
-std::string& rtrim(std::string& );
-std::string& trim(std::string& );
+string& ltrim(string& );
+string& rtrim(string& );
+string& trim(string& );
+
 void error(const char *msg)
 {
     perror(msg);
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
          exit(1);
      }
      sockfd = socket(AF_INET, SOCK_STREAM, 0);
-     if (sockfd < 0) 
+     if (sockfd < 0)
         error("ERROR opening socket");
      bzero((char *) &serv_addr, sizeof(serv_addr));
      portno = atoi(argv[1]);
@@ -49,14 +49,14 @@ int main(int argc, char *argv[])
      serv_addr.sin_addr.s_addr = INADDR_ANY;
      serv_addr.sin_port = htons(portno);
      if (bind(sockfd, (struct sockaddr *) &serv_addr,
-              sizeof(serv_addr)) < 0) 
+              sizeof(serv_addr)) < 0)
               error("ERROR on binding");
      listen(sockfd,5);
      clilen = sizeof(cli_addr);
      while (1) {
-         newsockfd = accept(sockfd, 
+         newsockfd = accept(sockfd,
                (struct sockaddr *) &cli_addr, &clilen);
-         if (newsockfd < 0) 
+         if (newsockfd < 0)
              error("ERROR on accept");
          pid = fork();
          if (pid < 0)
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 }
 
 /******** DOSTUFF() *********************
- There is a separate instance of this function 
+ There is a separate instance of this function
  for each connection.  It handles all communication
  once a connnection has been established.
  *****************************************/

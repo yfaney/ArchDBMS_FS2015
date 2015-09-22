@@ -5,8 +5,8 @@ if [ "$#" -ne 1 ]; then
 fi
 
 ./remote_startServer.sh $1
-echo "Wait 2 min so that every server gets started..."
-sleep 2m
+echo "Wait 3 min so that every server gets started..."
+sleep 3m
 
 for dest in $(<$1); do
    echo "Running client program on $dest ..."
@@ -15,8 +15,8 @@ for dest in $(<$1); do
    ssh -iid_rsa_dbms2 -oConnectTimeout=60 umkc_yjang@${dest} /home/umkc_yjang/local_startClient.sh
 done
 
-echo "Wait 60 min so that every server gets results..."
-FROMHERE=60
+echo "Wait 210 min so that every server gets results..."
+FROMHERE=210
 for ((i=FROMHERE; i>=1; i--))
 do
     echo "$i min remains..."
