@@ -19,17 +19,18 @@
 
 using namespace std;
 
-int hostname_to_ip(char *  , char *);
-vector<string> getAddrList(const char*);
-void writeLogList(const char*, vector<string>);
-string recvContents(ClientSocket*);
-vector<string> getTestList();
-double getTimeDiff(struct timeval , struct timeval );
-string timeNow();
+int hostname_to_ip(string  , char *);
 int mysleep(int );
-
 // random generator function:
 int myrandom (int i) { return rand()%i;}
+void writeLogList(const char*, vector<string>);
+void tuneNetwork(ClientSocket* );
+vector<string> getAddrList(const char*);
+vector<string> getTestList();
+string recvContents(ClientSocket*);
+string timeNow();
+string getMyHostName();
+double getTimeDiff(struct timeval , struct timeval );
 
 
 const char* NODE_LIST = "/home/umkc_yjang/nodelist.txt";
@@ -43,62 +44,46 @@ int main ( int argc, char* argv[] )
     cout << "usage: " << argv[0] << " <NODE_LIST_FILE> <OUTPUT_LOG_FILE>" <<endl;
     return 1;
   }
-  string test = timeNow();
-  cout << "Current Time: " << test << endl;
+  cout << "Current Time: " << timeNow() << endl;
   struct timeval t_start, t_end, pt_start, pt_end;
-//  double pt_start = omp_get_wtime();
-  char lhost[256];
-  lhost[255] = '\0';
-  gethostname(lhost, 255);
-  string myhost(lhost);
+  string myhost = getMyHostName();
   char ip[15];
-  char hostName[256];
   vector<string> addrList = getAddrList(argv[1]);
-//  vector<string> addrList = getTestList();
-// Shuffling the list
+//vector<string> addrList = getTestList();
+//Shuffling the list
   srand ( unsigned ( time(0) ) );
-// using myrandom:
   random_shuffle ( addrList.begin(), addrList.end(), myrandom);
   vector<string> logList;
   int progress = 1;
   int retryCount = 0;
   for(vector<string>::iterator it = addrList.begin(); it != addrList.end(); ++it){
-    if(myhost.compare(*it) == 0) continue;
 // Retry up to 3 times to avoid some temporary problems
     if(retryCount > 0 && retryCount < 3){
-      cout << "Retry on " << *it << endl;
-      --it;
+      cout << "Retry on " << *it << "after 3 seconds..." << endl;
+      if(it != addrList.begin()) --it;
       ++retryCount;
       mysleep(3000);
     }else{
       retryCount = 0;
     }
+    if(myhost.compare(*it) == 0) continue;
     try{
-      strcpy(hostName, (*it).c_str());
-      cout << "I" << progress << ":Connecting:"<<hostName<< "." <<flush;
-      hostname_to_ip(hostName, ip);
+      cout << "I" << progress << ":Connecting:"<< *it << "." <<flush;
+      hostname_to_ip(*it, ip);
       ClientSocket client_socket ( ip, 55700 );
       cout << "Connected." << flush;
       gettimeofday(&pt_start, NULL);
       string reply;
       try{
         int i=0;
-        int j=0;
         gettimeofday(&t_start, NULL);
-// This part is for tuning!! -Start
-        for(i=0; i<4; i++){
-          for(j=0; j<NO_OF_FILES; j++){
-  	    client_socket << FILE_LIST[j];
-            reply = recvContents(&client_socket);
-          }
-        }
-// This part is for tuning!! -End
+        tuneNetwork(&client_socket);
 // Now Real Measuring!! -Start
         string currTime = timeNow();
         cout << "Measuring RTT..." << flush;
-        for(j=0; j<NO_OF_FILES; j++){
-          if(DEBUG) cout << "Req:" << FILE_LIST[j] << endl;
-	  client_socket << FILE_LIST[j];
+        for(i=0; i<NO_OF_FILES; i++){
+          if(DEBUG) cout << "Req:" << FILE_LIST[i] << endl;
+	  client_socket << FILE_LIST[i];
           reply = recvContents(&client_socket);
           gettimeofday(&t_end, NULL);
           double delay = getTimeDiff(t_start, t_end);
@@ -111,6 +96,8 @@ int main ( int argc, char* argv[] )
         }
         gettimeofday(&pt_end, NULL);
         cout << "Done within " <<getTimeDiff(pt_start, pt_end) << "sec." << endl << flush;
+        ++progress;
+        retryCount = 0;
       }
       catch ( SocketException& e) {
         cout << endl << "Exception was caught during file receiving:" << e.description() << endl;
@@ -120,22 +107,39 @@ int main ( int argc, char* argv[] )
     {
       cout << endl << "Exception was caught:" << e.description() << endl;
     }
-    ++progress;
   }
   if(logList.size() > 0){
     writeLogList(argv[2], logList);
-//    double pt_end = omp_get_wtime();
     //printLogList(RESULT_FILE, logList);
   }
-  cout << "Finished." << endl;
+  cout << "Finished on " << timeNow() <<  endl;
   return 0;
 }
 
+void tuneNetwork(ClientSocket* sk){
+  string reply;
+  int i;
+  int j;
+  for(i=0; i<4; i++){
+    for(j=0; j<NO_OF_FILES; j++){
+      *(sk) << FILE_LIST[j];
+      reply = recvContents(sk);
+    }
+  }
+}
 int mysleep(int msec){
   struct timespec tim;
   tim.tv_sec = msec / 1000;
-  tim.tv_nsec = (msec - tim.tv_sec * 1000) / 1000000;
+  tim.tv_nsec = (msec - tim.tv_sec * 1000) * 1000000;
   return nanosleep(&tim, NULL);
+}
+
+string getMyHostName(){
+  char lhost[256];
+  lhost[255] = '\0';
+  gethostname(lhost, 255);
+  string myhost(lhost);
+  return myhost;
 }
 
 string timeNow(){
@@ -180,13 +184,15 @@ vector<string> getTestList(){
     Get ip from domain name
  */
 
-int hostname_to_ip(char * hostname , char* ip)
+int hostname_to_ip(string hostName , char* ip)
 {
+    char lHostName[256];
+    strcpy(lHostName, hostName.c_str());
     struct hostent *he;
     struct in_addr **addr_list;
     int i;
 
-    if ( (he = gethostbyname( hostname ) ) == NULL)
+    if ( (he = gethostbyname( lHostName ) ) == NULL)
     {
         // get the host info
         herror("gethostbyname");
