@@ -94,7 +94,7 @@ int main ( int argc, char* argv[] )
           logList.push_back(ss.str());
         }
         gettimeofday(&pt_end, NULL);
-        cout << "Done within " <<getTimeDiff(pt_start, pt_end) << "sec." << endl << flush;
+        cout << "Done within " <<getTimeDiff(pt_start, pt_end)/1000 << "sec." << endl << flush;
         ++progress;
         retryCount = 0;
       }
