@@ -61,7 +61,6 @@ int main ( int argc, char* argv[] )
     if(retryCount > 0 && retryCount < 3){
       cout << "Retry on " << *it << "after 3 seconds..." << endl;
       if(it != addrList.begin()) --it;
-      ++retryCount;
       mysleep(3000);
     }else{
       retryCount = 0;
@@ -101,11 +100,13 @@ int main ( int argc, char* argv[] )
       }
       catch ( SocketException& e) {
         cout << endl << "Exception was caught during file receiving:" << e.description() << endl;
+        ++retryCount;
       }
     }
     catch ( SocketException& e )
     {
       cout << endl << "Exception was caught:" << e.description() << endl;
+      ++retryCount;
     }
   }
   if(logList.size() > 0){
