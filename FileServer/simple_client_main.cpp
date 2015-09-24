@@ -59,8 +59,8 @@ int main ( int argc, char* argv[] )
   for(vector<string>::iterator it = addrList.begin(); it != addrList.end(); ++it){
 // Retry up to 3 times to avoid some temporary problems
     if(retryCount > 0 && retryCount < 3){
-      cout << "Retry on " << *it << "after 3 seconds..." << endl;
       if(it != addrList.begin()) --it;
+      cout << "Retry on " << *it << "after 3 seconds..." << endl;
       mysleep(3000);
     }else{
       retryCount = 0;
