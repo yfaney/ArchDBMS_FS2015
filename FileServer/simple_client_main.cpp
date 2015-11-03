@@ -75,13 +75,13 @@ int main ( int argc, char* argv[] )
       string reply;
       try{
         int i=0;
-        gettimeofday(&t_start, NULL);
         tuneNetwork(&client_socket);
 // Now Real Measuring!! -Start
         string currTime = timeNow();
         cout << "Measuring RTT..." << flush;
         for(i=0; i<NO_OF_FILES; i++){
           if(DEBUG) cout << "Req:" << FILE_LIST[i] << endl;
+          gettimeofday(&t_start, NULL);
 	  client_socket << FILE_LIST[i];
           reply = recvContents(&client_socket);
           gettimeofday(&t_end, NULL);
